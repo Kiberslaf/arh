@@ -26,20 +26,19 @@ jobs:
     - name: Build APK
       run: |
         buildozer init
+        
+        # Настраиваем buildozer.spec
         sed -i 's/# requirements = python3,kivy/requirements = python3,kivy/' buildozer.spec
         sed -i 's/title = My Application/title = Arh/' buildozer.spec
         sed -i 's/package.name = myapp/package.name = arh/' buildozer.spec
         sed -i 's/# icon.filename = %(source.dir)s\/data\/icon.png/icon.filename = %(source.dir)s\/icon.png/' buildozer.spec
         sed -i 's/^android.archs = .*/android.archs = arm64-v8a/' buildozer.spec
         
-        # ВОТ ГЛАВНАЯ СТРОЧКА: приказываем Buildozer принять лицензию
-        sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
-        
-        # Создаем файл лицензии на всякий случай
+        # Принудительно создаем файл лицензии в ПРАВИЛЬНОМ месте
         mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
         echo -e "\n8933bad161af4b6a5b573652ffc7aaf3aee85a47" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
         
-        # Запускаем сборку
+        # Запускаем сборку с подтверждением
         yes | buildozer -v android debug
         
     - name: Upload APK
