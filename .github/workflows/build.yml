@@ -7,16 +7,33 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04  # Используем старую версию, где есть все пакеты
 
     steps:
     - uses: actions/checkout@v4
-
-    - name: Build with Buildozer
-      uses: digreatbrian/buildozer-action@v2
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        buildozer-cmd: buildozer -v android debug
-
+        python-version: '3.9'
+        
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        pip install --upgrade buildozer
+        pip install --user --upgrade Cython==0.29.33 virtualenv
+        
+    - name: Build APK
+      run: |
+        buildozer init
+        sed -i 's/# requirements = python3,kivy/requirements = python3,kivy/' buildozer.spec
+        sed -i 's/title = My Application/title = Arh/' buildozer.spec
+        sed -i 's/package.name = myapp/package.name = arh/' buildozer.spec
+        sed -i 's/# icon.filename = %(source.dir)s\/data\/icon.png/icon.filename = %(source.dir)s\/icon.png/' buildozer.spec
+        sed -i 's/^android.archs = .*/android.archs = arm64-v8a/' buildozer.spec
+        yes | buildozer -v android debug
+        
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
