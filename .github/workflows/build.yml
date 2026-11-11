@@ -34,11 +34,18 @@ jobs:
         sed -i 's/# icon.filename = %(source.dir)s\/data\/icon.png/icon.filename = %(source.dir)s\/icon.png/' buildozer.spec
         sed -i 's/^android.archs = .*/android.archs = arm64-v8a/' buildozer.spec
         
-        # Принудительно создаем файл лицензии в ПРАВИЛЬНОМ месте
-        mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
-        echo -e "\n8933bad161af4b6a5b573652ffc7aaf3aee85a47" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
+        # Скачиваем СВЕЖИЙ Android Command Line Tools напрямую от Google
+        mkdir -p ~/.buildozer/android/platform/android-sdk
+        cd ~/.buildozer/android/platform/android-sdk
+        wget https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip
+        unzip commandlinetools-linux-11076708_latest.zip
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/bin cmdline-tools/lib cmdline-tools/source.properties cmdline-tools/latest/ 2>/dev/null || true
         
-        # Запускаем сборку с подтверждением
+        # Создаем симлинк, чтобы Buildozer думал, что это старая папка tools
+        ln -s cmdline-tools/latest tools
+        
+        # Запускаем сборку
         yes | buildozer -v android debug
         
     - name: Upload APK
