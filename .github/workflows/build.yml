@@ -32,7 +32,10 @@ jobs:
         sed -i 's/# icon.filename = %(source.dir)s\/data\/icon.png/icon.filename = %(source.dir)s\/icon.png/' buildozer.spec
         sed -i 's/^android.archs = .*/android.archs = arm64-v8a/' buildozer.spec
         
-        # Принудительно создаем файл лицензии
+        # ВОТ ГЛАВНАЯ СТРОЧКА: приказываем Buildozer принять лицензию
+        sed -i 's/# android.accept_sdk_license = False/android.accept_sdk_license = True/' buildozer.spec
+        
+        # Создаем файл лицензии на всякий случай
         mkdir -p ~/.buildozer/android/platform/android-sdk/licenses
         echo -e "\n8933bad161af4b6a5b573652ffc7aaf3aee85a47" > ~/.buildozer/android/platform/android-sdk/licenses/android-sdk-license
         
