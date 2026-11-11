@@ -1,0 +1,41 @@
+name: Build Arch APK
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev
+        ln -s /usr/lib/x86_64-linux-gnu/libtinfo.so.6 /usr/lib/x86_64-linux-gnu/libtinfo.so.5 || true
+        pip install --upgrade buildozer cython
+        
+    - name: Build APK
+      run: |
+        buildozer init
+        sed -i 's/# requirements = python3,kivy/requirements = python3,kivy/' buildozer.spec
+        sed -i 's/title = My Application/title = Arh/' buildozer.spec
+        sed -i 's/package.name = myapp/package.name = arh/' buildozer.spec
+        sed -i 's/# icon.filename = %(source.dir)s\/data\/icon.png/icon.filename = %(source.dir)s\/icon.png/' buildozer.spec
+        sed -i 's/^android.archs = .*/android.archs = arm64-v8a/' buildozer.spec
+        buildozer -v android debug
+        
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Arch-APK
+        path: bin/*.apk
