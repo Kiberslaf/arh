@@ -11,16 +11,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Build with Buildozer
-      uses: ArtemSBulgakov/buildozer-action@v1
-      id: buildozer
+      uses: digreatbrian/buildozer-action@v2
       with:
-        command: buildozer android debug
-        buildozer_version: stable
-        
+        buildozer-cmd: buildozer -v android debug
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: Arch-APK
-        path: ${{ steps.buildozer.outputs.filename }}
+        path: bin/*.apk
